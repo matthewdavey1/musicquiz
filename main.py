@@ -27,6 +27,7 @@ def run_quiz():
       print("\nSorry Invalid Input")
 
   song_list = []
+
   match choice:
 
     case 1:
@@ -38,15 +39,48 @@ def run_quiz():
     case 3:
       song_list = get_data("2010s_songs.txt")
 
+
 #We Now Have Clean Data#
 
   song_list = process_data(song_list)
 
   #Pick Random Song
+  fails = 0
+  points = 0
+  while fails < 2:
 
-  random_line = random.randint(0, len(song_list) - 1)
+    if fails == 0:
+      random_line = random.randint(0, len(song_list) - 1)
 
-  line = song_list[random_line]
+      line = song_list[random_line]
+
+    artist, song, prompt = generate_prompt(line, fails)
+
+    print("\nThis Song is by '" + artist + "', What is it Called?\n")
+    print(prompt)
+    guess = input("\n")
+
+    if guess.lower() == song.lower():
+      fails = 0
+      points += (10 - (fails * 5))
+      print("\nWell Done You Are Correct!")
+
+    elif fails == 0:
+      print("\nSorry That's Incorrect, You Have One More Guess!")
+      fails += 1
+
+    else:
+      print("Sorry Game Over")
+      fails += 1
+
+  print("You Scored " + str(points))
+
+  #Adding Points To Scoreboard
+
+  print("Would You Like To Upload Your Points To The Scoreboard?")
+
+
+def generate_prompt(line, attempt_num):
 
   line = line.split(',')
 
@@ -55,21 +89,36 @@ def run_quiz():
   song = line[1]
 
   #Hyphonating song
-
-  song = song.split(' ')
+  prompt = song
+  split_song = song.split(' ')
 
   i = 0
 
-  while i < len(song):
-    word = song[i]
+  while i < len(split_song):
+    word = split_song[i]
     i += 1
 
     j = 0
 
+    latch = False
+
     while j < len(word):
       letter = word[j]
       j += 1
-      print(letter)
+      #if retunrns not -1
+      if string.ascii_uppercase.find(letter) != -1 and attempt_num == 1:
+        latch = True
+      elif string.ascii_lowercase.find(letter) != -1:
+        if latch == False:
+          prompt = prompt.replace(letter, "-", 1)
+        latch = False
+
+  #remove every lowercase accpet directly after capitals
+
+  #if caps then skip next
+  #if not caps continue
+
+  return artist, song, prompt
 
 
 #Splitting The Line
@@ -96,6 +145,7 @@ def get_data(file_name):
 
 
 def process_data(dirty_data):
+
   i = 0
 
   while i < len(dirty_data):
@@ -106,3 +156,4 @@ def process_data(dirty_data):
 
 
 run_quiz()
+
